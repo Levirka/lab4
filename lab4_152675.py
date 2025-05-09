@@ -1,5 +1,3 @@
-# MCDM Analysis of Students' Late Submissions - Fun Version
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,67 +5,67 @@ import matplotlib.pyplot as plt
 from pymcdm.methods import TOPSIS, SPOTIS, VIKOR, PROMETHEE_II
 from pymcdm.normalizations import minmax_normalization
 
-# Define decision matrix and weights
-alternatives = ['Student A', 'Student B', 'Student C', 'Student W']
-decision_matrix = np.array([
-    [5, 3, 8, 6],     # Student A: moderately late, medium dramatyzm, good quality, decent contribution
-    [15, 7, 4, 7],    # Student B: quite late, high dramatyzm, average quality, good contribution
-    [10, 5, 6, 5],    # Student C: late, some dramatyzm, decent quality, average contribution
-    [30, 10, 5, 10]   # Student W: very late, very dramatic, moderate quality, top contribution
+# Definicja macierzy decyzyjnej i wag
+alternatywy = ['Student A', 'Student B', 'Student C', 'Student W']
+macierz_deczycyjna = np.array([
+    [5, 3, 8, 6],     # Student A: umiarkowane spóźnienie, średni dramatyzm, dobra jakość, przyzwoity wkład
+    [15, 7, 4, 7],    # Student B: dość duże spóźnienie, wysoki dramatyzm, przeciętna jakość, dobry wkład
+    [10, 5, 6, 5],    # Student C: spóźniony, trochę dramatyzmu, przyzwoita jakość, średni wkład
+    [30, 10, 5, 10]   # Student W: bardzo spóźniony, bardzo dramatyczny, średnia jakość, najlepszy wkład
 ])
-weights = np.array([0.4, 0.3, 0.2, 0.1])
-criteria_types = [-1, -1, 1, 1]  # Minimize lateness and dramatyzm, maximize quality and contribution
+wagi = np.array([0.4, 0.3, 0.2, 0.1])
+typy_kryteriów = [-1, -1, 1, 1]  # Minimalizować spóźnienie i dramatyzm, maksymalizować jakość i wkład
 
-# Normalize decision matrix
-normalized_matrix = minmax_normalization(decision_matrix, criteria_types)
+# Normalizacja macierzy decyzyjnej
+znormalizowana_macierz = minmax_normalization(macierz_deczycyjna, typy_kryteriów)
 
-# Initialize MCDM methods
+# Inicjalizacja metod MCDM
 topsis = TOPSIS()
-spotis = SPOTIS(np.stack((np.min(decision_matrix, axis=0), np.max(decision_matrix, axis=0)), axis=1))
+spotis = SPOTIS(np.stack((np.min(macierz_deczycyjna, axis=0), np.max(macierz_deczycyjna, axis=0)), axis=1))
 vikor = VIKOR()
 promethee = PROMETHEE_II('usual')
 
-# Calculate scores for each method
-topsis_scores = topsis(normalized_matrix, weights, criteria_types)
-spotis_scores = spotis(decision_matrix, weights, criteria_types)
-vikor_scores = vikor(decision_matrix, weights, criteria_types)
-promethee_scores = promethee(decision_matrix, weights, criteria_types)
+# Obliczanie wyników dla każdej metody
+wyniki_topsis = topsis(znormalizowana_macierz, wagi, typy_kryteriów)
+wyniki_spotis = spotis(macierz_deczycyjna, wagi, typy_kryteriów)
+wyniki_vikor = vikor(macierz_deczycyjna, wagi, typy_kryteriów)
+wyniki_promethee = promethee(macierz_deczycyjna, wagi, typy_kryteriów)
 
-# Collect results in a DataFrame
-results = pd.DataFrame({
-    'Alternative': alternatives,
-    'TOPSIS': topsis_scores,
-    'SPOTIS': spotis_scores,
-    'VIKOR': vikor_scores,
-    'PROMETHEE': promethee_scores
+# Zebranie wyników w ramce danych
+wyniki = pd.DataFrame({
+    'Alternatywa': alternatywy,
+    'TOPSIS': wyniki_topsis,
+    'SPOTIS': wyniki_spotis,
+    'VIKOR': wyniki_vikor,
+    'PROMETHEE': wyniki_promethee
 })
-results['TOPSIS Rank'] = results['TOPSIS'].rank(ascending=False)
-results['SPOTIS Rank'] = results['SPOTIS'].rank(ascending=True)
-results['VIKOR Rank'] = results['VIKOR'].rank(ascending=True)
-results['PROMETHEE Rank'] = results['PROMETHEE'].rank(ascending=False)
+wyniki['Ranking TOPSIS'] = wyniki['TOPSIS'].rank(ascending=False)
+wyniki['Ranking SPOTIS'] = wyniki['SPOTIS'].rank(ascending=True)
+wyniki['Ranking VIKOR'] = wyniki['VIKOR'].rank(ascending=True)
+wyniki['Ranking PROMETHEE'] = wyniki['PROMETHEE'].rank(ascending=False)
 
-print('MCDM Analysis Results of Student Submissions:')
-print(results)
+print('Wyniki analizy MCDM dla spóźnionych studentów:')
+print(wyniki)
 
-# Visualization
+# Wizualizacja
 fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-# Scores plot
-axs[0].bar(alternatives, results['TOPSIS'], label='TOPSIS', alpha=0.7)
-axs[0].bar(alternatives, results['SPOTIS'], label='SPOTIS', alpha=0.7)
-axs[0].bar(alternatives, results['VIKOR'], label='VIKOR', alpha=0.7)
-axs[0].bar(alternatives, results['PROMETHEE'], label='PROMETHEE', alpha=0.7)
-axs[0].set_title('Scores of Late Submission Justifications')
-axs[0].set_ylabel('Score')
+# Wykres wyników
+axs[0].bar(alternatywy, wyniki['TOPSIS'], label='TOPSIS', alpha=0.7)
+axs[0].bar(alternatywy, wyniki['SPOTIS'], label='SPOTIS', alpha=0.7)
+axs[0].bar(alternatywy, wyniki['VIKOR'], label='VIKOR', alpha=0.7)
+axs[0].bar(alternatywy, wyniki['PROMETHEE'], label='PROMETHEE', alpha=0.7)
+axs[0].set_title('Wyniki uzasadnienia spóźnionych prac')
+axs[0].set_ylabel('Wynik')
 axs[0].legend()
 
-# Ranking plot
-axs[1].bar(alternatives, results['TOPSIS Rank'], label='TOPSIS Rank')
-axs[1].bar(alternatives, results['SPOTIS Rank'], label='SPOTIS Rank')
-axs[1].bar(alternatives, results['VIKOR Rank'], label='VIKOR Rank')
-axs[1].bar(alternatives, results['PROMETHEE Rank'], label='PROMETHEE Rank')
-axs[1].set_title('Ranking Comparison of Student Submissions')
-axs[1].set_ylabel('Rank')
+# Wykres porównań rankingów
+axs[1].bar(alternatywy, wyniki['Ranking TOPSIS'], label='Ranking TOPSIS')
+axs[1].bar(alternatywy, wyniki['Ranking SPOTIS'], label='Ranking SPOTIS')
+axs[1].bar(alternatywy, wyniki['Ranking VIKOR'], label='Ranking VIKOR')
+axs[1].bar(alternatywy, wyniki['Ranking PROMETHEE'], label='Ranking PROMETHEE')
+axs[1].set_title('Porównanie rankingów studentów')
+axs[1].set_ylabel('Ranking')
 axs[1].invert_yaxis()
 axs[1].legend()
 
